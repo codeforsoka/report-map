@@ -71,7 +71,7 @@ export default function ReportForm() {
   };
 
   const useExifPosition = () => {
-    if (exifPosition) {
+    if (exifPosition && (position.lat !== exifPosition.lat || position.lng !== exifPosition.lng)) {
       setPosition(exifPosition);
       setLocationSource('画像EXIF');
     }
@@ -298,7 +298,7 @@ export default function ReportForm() {
                   )}
                 </div>
                 <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap' }}>
-                  {exifPosition && (
+                  {exifPosition && locationSource !== '画像EXIF' && (
                     <button
                       type="button"
                       onClick={useExifPosition}
@@ -324,30 +324,32 @@ export default function ReportForm() {
                       📷 撮影位置を使用
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={getCurrentPosition}
-                    style={{
-                      padding: 'var(--spacing-xs) var(--spacing-md)',
-                      backgroundColor: 'var(--color-surface)',
-                      color: 'var(--color-primary)',
-                      border: '1px solid var(--color-primary)',
-                      borderRadius: 'var(--border-radius)',
-                      cursor: 'pointer',
-                      fontSize: 'var(--font-size-sm)',
-                      fontWeight: 700,
-                      transition: 'all 0.2s',
-                      whiteSpace: 'nowrap'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = 'var(--color-primary-light)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'var(--color-surface)';
-                    }}
-                  >
-                    📍 現在地を取得
-                  </button>
+                  {locationSource !== 'GPS' && (
+                    <button
+                      type="button"
+                      onClick={getCurrentPosition}
+                      style={{
+                        padding: 'var(--spacing-xs) var(--spacing-md)',
+                        backgroundColor: 'var(--color-surface)',
+                        color: 'var(--color-primary)',
+                        border: '1px solid var(--color-primary)',
+                        borderRadius: 'var(--border-radius)',
+                        cursor: 'pointer',
+                        fontSize: 'var(--font-size-sm)',
+                        fontWeight: 700,
+                        transition: 'all 0.2s',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'var(--color-primary-light)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'var(--color-surface)';
+                      }}
+                    >
+                      📍 現在地を取得
+                    </button>
+                  )}
                 </div>
               </div>
             )}
