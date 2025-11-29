@@ -91,7 +91,7 @@ export default function AdminDashboard() {
     : [35.8255, 139.8227];
 
   return (
-    <div style={{ padding: 'var(--spacing-lg)' }}>
+    <div style={{ padding: 'var(--spacing-md)' }}>
       <div style={{
         maxWidth: '1400px',
         margin: '0 auto'
@@ -193,112 +193,57 @@ export default function AdminDashboard() {
             <div style={{
               backgroundColor: 'var(--color-surface)',
               borderRadius: 'var(--border-radius)',
-              padding: 'var(--spacing-lg)',
+              padding: 'var(--spacing-md)',
               boxShadow: 'var(--shadow-md)'
             }}>
               <h3 style={{ marginBottom: 'var(--spacing-md)' }}>報告一覧</h3>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  fontSize: 'var(--font-size-sm)'
-                }}>
-                  <thead>
-                    <tr style={{
-                      backgroundColor: 'var(--color-background)',
-                      borderBottom: '2px solid var(--color-border)'
-                    }}>
-                      <th style={{
-                        padding: 'var(--spacing-md)',
-                        textAlign: 'left',
-                        fontWeight: 700,
-                        color: 'var(--color-text)'
-                      }}>
-                        報告日時
-                      </th>
-                      <th style={{
-                        padding: 'var(--spacing-md)',
-                        textAlign: 'left',
-                        fontWeight: 700,
-                        color: 'var(--color-text)'
-                      }}>
-                        説明
-                      </th>
-                      <th style={{
-                        padding: 'var(--spacing-md)',
-                        textAlign: 'left',
-                        fontWeight: 700,
-                        color: 'var(--color-text)'
-                      }}>
-                        位置
-                      </th>
-                      <th style={{
-                        padding: 'var(--spacing-md)',
-                        textAlign: 'left',
-                        fontWeight: 700,
-                        color: 'var(--color-text)'
-                      }}>
-                        画像
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {reports.map((report) => (
-                      <tr
-                        key={report.id}
-                        style={{
-                          backgroundColor: selectedReport?.id === report.id ? 'var(--color-primary-light)' : 'var(--color-surface)',
-                          cursor: 'pointer',
-                          borderBottom: '1px solid var(--color-border)',
-                          transition: 'background-color 0.2s'
-                        }}
-                        onClick={() => setSelectedReport(report)}
-                        onMouseEnter={(e) => {
-                          if (selectedReport?.id !== report.id) {
-                            e.currentTarget.style.backgroundColor = 'var(--color-background)';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (selectedReport?.id !== report.id) {
-                            e.currentTarget.style.backgroundColor = 'var(--color-surface)';
-                          }
-                        }}
-                      >
-                        <td style={{ padding: 'var(--spacing-md)' }}>
-                          {new Date(report.created_at).toLocaleString('ja-JP')}
-                        </td>
-                        <td style={{ padding: 'var(--spacing-md)' }}>
-                          {report.description}
-                        </td>
-                        <td style={{
-                          padding: 'var(--spacing-md)',
-                          fontSize: 'var(--font-size-xs)',
-                          color: 'var(--color-text-secondary)'
-                        }}>
-                          {report.latitude.toFixed(6)}, {report.longitude.toFixed(6)}
-                        </td>
-                        <td style={{ padding: 'var(--spacing-md)' }}>
-                          {report.image_url ? (
-                            <a
-                              href={report.image_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              style={{
-                                color: 'var(--color-primary)',
-                                textDecoration: 'underline'
-                              }}
-                            >
-                              表示
-                            </a>
-                          ) : (
-                            <span style={{ color: 'var(--color-text-secondary)' }}>—</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+
+              {/* スマホ用: カード表示 */}
+              <div style={{ display: 'block' }}>
+                {reports.map((report) => (
+                  <div
+                    key={report.id}
+                    onClick={() => setSelectedReport(report)}
+                    style={{
+                      backgroundColor: selectedReport?.id === report.id ? 'var(--color-primary-light)' : 'var(--color-background)',
+                      padding: 'var(--spacing-md)',
+                      marginBottom: 'var(--spacing-md)',
+                      borderRadius: 'var(--border-radius)',
+                      border: '1px solid var(--color-border)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ marginBottom: 'var(--spacing-sm)' }}>
+                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-xs)' }}>
+                        {new Date(report.created_at).toLocaleString('ja-JP')}
+                      </div>
+                      <div style={{ fontSize: 'var(--font-size-base)', fontWeight: 700, marginBottom: 'var(--spacing-xs)' }}>
+                        {report.description}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 'var(--font-size-sm)', flexWrap: 'wrap', gap: 'var(--spacing-xs)' }}>
+                      <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
+                        📍 {report.latitude.toFixed(4)}, {report.longitude.toFixed(4)}
+                      </div>
+                      {report.image_url && (
+                        <a
+                          href={report.image_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{
+                            color: 'var(--color-primary)',
+                            textDecoration: 'underline',
+                            fontSize: 'var(--font-size-sm)'
+                          }}
+                        >
+                          📷 画像を表示
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 

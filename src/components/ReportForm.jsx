@@ -170,12 +170,12 @@ export default function ReportForm() {
     <div style={{
       maxWidth: '800px',
       margin: '0 auto',
-      padding: 'var(--spacing-xl) var(--spacing-lg)'
+      padding: 'var(--spacing-md)'
     }}>
       <div style={{
         backgroundColor: 'var(--color-surface)',
         borderRadius: 'var(--border-radius)',
-        padding: 'var(--spacing-xl)',
+        padding: 'var(--spacing-md)',
         boxShadow: 'var(--shadow-md)'
       }}>
         <h2 style={{ marginBottom: 'var(--spacing-md)', fontSize: 'var(--font-size-2xl)' }}>
@@ -282,22 +282,17 @@ export default function ReportForm() {
                 padding: 'var(--spacing-sm)',
                 backgroundColor: 'var(--color-primary-light)',
                 borderRadius: 'var(--border-radius)',
-                fontSize: 'var(--font-size-sm)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: 'var(--spacing-sm)'
+                fontSize: 'var(--font-size-sm)'
               }}>
-                <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
+                <div style={{ marginBottom: 'var(--spacing-xs)', wordBreak: 'break-all' }}>
                   <strong>緯度:</strong> {position.lat.toFixed(6)}, <strong>経度:</strong> {position.lng.toFixed(6)}
                   {locationSource && (
-                    <span style={{ marginLeft: 'var(--spacing-sm)', color: 'var(--color-text-secondary)' }}>
+                    <div style={{ marginTop: 'var(--spacing-xs)', color: 'var(--color-text-secondary)' }}>
                       ({locationSource}から取得)
-                    </span>
+                    </div>
                   )}
                 </div>
-                <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
                   {exifPosition && locationSource !== '画像EXIF' && (
                     <button
                       type="button"
