@@ -1,6 +1,8 @@
 # 草加市 報告システム
 
 草加市内で発生した建物や道路の異常、災害の様子などを、テキスト・画像・位置情報とともに報告できるシステムです。
+以下ページからアクセス可能です。
+[https://codeforsoka.github.io/report-map/](https://codeforsoka.github.io/report-map/)
 
 ## 機能
 

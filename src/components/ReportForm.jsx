@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { useState, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import ExifReader from 'exifreader';
 import { supabase } from '../lib/supabase';
 import 'leaflet/dist/leaflet.css';
@@ -12,6 +12,19 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
+
+// 地図の中心を更新するコンポーネント
+function MapCenterUpdater({ center }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (center) {
+      map.setView([center.lat, center.lng], map.getZoom());
+    }
+  }, [center, map]);
+
+  return null;
+}
 
 function LocationMarker({ position, setPosition }) {
   useMapEvents({
@@ -30,6 +43,7 @@ export default function ReportForm() {
   const [position, setPosition] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [locationSource, setLocationSource] = useState(''); // 位置情報の取得元を追跡
 
   useEffect(() => {
     setPosition({ lat: 35.8255, lng: 139.8227 });
@@ -43,6 +57,7 @@ export default function ReportForm() {
             lat: pos.coords.latitude,
             lng: pos.coords.longitude,
           });
+          setLocationSource('GPS');
         },
         (error) => {
           console.error('GPS取得エラー:', error);
@@ -68,12 +83,13 @@ export default function ReportForm() {
         const lat = tags.GPSLatitude.description;
         const lng = tags.GPSLongitude.description;
         setPosition({ lat: parseFloat(lat), lng: parseFloat(lng) });
+        setLocationSource('画像EXIF');
       } else {
-        getCurrentPosition();
+        setLocationSource('');
       }
     } catch (error) {
       console.error('EXIF読み取りエラー:', error);
-      getCurrentPosition();
+      setLocationSource('');
     }
   };
 
@@ -124,6 +140,8 @@ export default function ReportForm() {
       setDescription('');
       setImage(null);
       setImagePreview(null);
+      setLocationSource('');
+      setPosition({ lat: 35.8255, lng: 139.8227 });
 
       e.target.reset();
 
@@ -222,7 +240,7 @@ export default function ReportForm() {
               }}
             />
             <small style={{ display: 'block', marginTop: 'var(--spacing-xs)' }}>
-              画像のEXIF情報から位置情報を自動取得します
+              画像にGPS情報が含まれている場合、自動的に位置情報を取得します
             </small>
             {imagePreview && (
               <div style={{ marginTop: 'var(--spacing-md)' }}>
@@ -244,41 +262,55 @@ export default function ReportForm() {
             <label>
               位置情報 <span style={{ color: 'var(--color-error)' }}>*</span>
             </label>
-            <button
-              type="button"
-              onClick={getCurrentPosition}
-              style={{
-                padding: 'var(--spacing-sm) var(--spacing-lg)',
-                marginBottom: 'var(--spacing-md)',
-                backgroundColor: 'var(--color-surface)',
-                color: 'var(--color-primary)',
-                border: '1px solid var(--color-primary)',
-                borderRadius: 'var(--border-radius)',
-                cursor: 'pointer',
-                fontSize: 'var(--font-size-base)',
-                fontWeight: 700,
-                transition: 'all 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.backgroundColor = 'var(--color-primary-light)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.backgroundColor = 'var(--color-surface)';
-              }}
-            >
-              📍 現在地を取得
-            </button>
+
             {position && (
               <div style={{
                 marginBottom: 'var(--spacing-md)',
                 padding: 'var(--spacing-sm)',
                 backgroundColor: 'var(--color-primary-light)',
                 borderRadius: 'var(--border-radius)',
-                fontSize: 'var(--font-size-sm)'
+                fontSize: 'var(--font-size-sm)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 'var(--spacing-sm)'
               }}>
-                緯度: {position.lat.toFixed(6)}, 経度: {position.lng.toFixed(6)}
+                <div>
+                  <strong>緯度:</strong> {position.lat.toFixed(6)}, <strong>経度:</strong> {position.lng.toFixed(6)}
+                  {locationSource && (
+                    <span style={{ marginLeft: 'var(--spacing-sm)', color: 'var(--color-text-secondary)' }}>
+                      ({locationSource}から取得)
+                    </span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={getCurrentPosition}
+                  style={{
+                    padding: 'var(--spacing-xs) var(--spacing-md)',
+                    backgroundColor: 'var(--color-surface)',
+                    color: 'var(--color-primary)',
+                    border: '1px solid var(--color-primary)',
+                    borderRadius: 'var(--border-radius)',
+                    cursor: 'pointer',
+                    fontSize: 'var(--font-size-sm)',
+                    fontWeight: 700,
+                    transition: 'all 0.2s',
+                    whiteSpace: 'nowrap'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'var(--color-primary-light)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'var(--color-surface)';
+                  }}
+                >
+                  現在地を取得
+                </button>
               </div>
             )}
+
             <small style={{ display: 'block', marginBottom: 'var(--spacing-md)' }}>
               地図をクリックして位置を調整できます
             </small>
@@ -299,6 +331,7 @@ export default function ReportForm() {
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
+                  <MapCenterUpdater center={position} />
                   <LocationMarker position={position} setPosition={setPosition} />
                 </MapContainer>
               </div>
