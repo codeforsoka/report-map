@@ -41,6 +41,7 @@ export default function ReportForm() {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [position, setPosition] = useState(null);
+  const [exifPosition, setExifPosition] = useState(null); // EXIF位置情報を保存
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
   const [locationSource, setLocationSource] = useState(''); // 位置情報の取得元を追跡
@@ -69,6 +70,13 @@ export default function ReportForm() {
     }
   };
 
+  const useExifPosition = () => {
+    if (exifPosition) {
+      setPosition(exifPosition);
+      setLocationSource('画像EXIF');
+    }
+  };
+
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -82,13 +90,17 @@ export default function ReportForm() {
       if (tags.GPSLatitude && tags.GPSLongitude) {
         const lat = tags.GPSLatitude.description;
         const lng = tags.GPSLongitude.description;
-        setPosition({ lat: parseFloat(lat), lng: parseFloat(lng) });
+        const exifPos = { lat: parseFloat(lat), lng: parseFloat(lng) };
+        setExifPosition(exifPos);
+        setPosition(exifPos);
         setLocationSource('画像EXIF');
       } else {
+        setExifPosition(null);
         setLocationSource('');
       }
     } catch (error) {
       console.error('EXIF読み取りエラー:', error);
+      setExifPosition(null);
       setLocationSource('');
     }
   };
@@ -140,6 +152,7 @@ export default function ReportForm() {
       setDescription('');
       setImage(null);
       setImagePreview(null);
+      setExifPosition(null);
       setLocationSource('');
       setPosition({ lat: 35.8255, lng: 139.8227 });
 
@@ -276,7 +289,7 @@ export default function ReportForm() {
                 flexWrap: 'wrap',
                 gap: 'var(--spacing-sm)'
               }}>
-                <div>
+                <div style={{ flex: '1 1 auto', minWidth: '200px' }}>
                   <strong>緯度:</strong> {position.lat.toFixed(6)}, <strong>経度:</strong> {position.lng.toFixed(6)}
                   {locationSource && (
                     <span style={{ marginLeft: 'var(--spacing-sm)', color: 'var(--color-text-secondary)' }}>
@@ -284,30 +297,58 @@ export default function ReportForm() {
                     </span>
                   )}
                 </div>
-                <button
-                  type="button"
-                  onClick={getCurrentPosition}
-                  style={{
-                    padding: 'var(--spacing-xs) var(--spacing-md)',
-                    backgroundColor: 'var(--color-surface)',
-                    color: 'var(--color-primary)',
-                    border: '1px solid var(--color-primary)',
-                    borderRadius: 'var(--border-radius)',
-                    cursor: 'pointer',
-                    fontSize: 'var(--font-size-sm)',
-                    fontWeight: 700,
-                    transition: 'all 0.2s',
-                    whiteSpace: 'nowrap'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'var(--color-primary-light)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'var(--color-surface)';
-                  }}
-                >
-                  現在地を取得
-                </button>
+                <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap' }}>
+                  {exifPosition && (
+                    <button
+                      type="button"
+                      onClick={useExifPosition}
+                      style={{
+                        padding: 'var(--spacing-xs) var(--spacing-md)',
+                        backgroundColor: 'var(--color-surface)',
+                        color: 'var(--color-primary)',
+                        border: '1px solid var(--color-primary)',
+                        borderRadius: 'var(--border-radius)',
+                        cursor: 'pointer',
+                        fontSize: 'var(--font-size-sm)',
+                        fontWeight: 700,
+                        transition: 'all 0.2s',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = 'var(--color-primary-light)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'var(--color-surface)';
+                      }}
+                    >
+                      📷 撮影位置を使用
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={getCurrentPosition}
+                    style={{
+                      padding: 'var(--spacing-xs) var(--spacing-md)',
+                      backgroundColor: 'var(--color-surface)',
+                      color: 'var(--color-primary)',
+                      border: '1px solid var(--color-primary)',
+                      borderRadius: 'var(--border-radius)',
+                      cursor: 'pointer',
+                      fontSize: 'var(--font-size-sm)',
+                      fontWeight: 700,
+                      transition: 'all 0.2s',
+                      whiteSpace: 'nowrap'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'var(--color-primary-light)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'var(--color-surface)';
+                    }}
+                  >
+                    📍 現在地を取得
+                  </button>
+                </div>
               </div>
             )}
 
